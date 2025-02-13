@@ -7,6 +7,8 @@
 
 #include <GeographicLib/UTMUPS.hpp>
 #include <rclcpp/logging.hpp>
+#include <chrono>
+#include <iomanip>
 #ifdef TRMB_TF2_HEADER_DEPRECATED
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #else
@@ -47,6 +49,26 @@ rclcpp::Time toRosTimeGpsEpoch(const trmb::gsof::GpsTime &gps_time) {
       (k_gps_seconds_in_week * static_cast<std::int64_t>(gps_time.week) * k_sec_to_nano) +
       (k_milli_to_nano * gps_time.time_msec);
   return rclcpp::Time(gps_nanoseconds_since_epoch, RCL_STEADY_TIME);
+}
+
+rclcpp::Time toRosTimeGpsUTC(const trmb::gsof::GpsTime &gps_time, uint16_t utc_offset) {
+
+  // Get the GPS epoch time
+  struct tm gps_epoch = {};
+  gps_epoch.tm_year = 1980 - 1900; // years since 1900
+  gps_epoch.tm_mon = 1 - 1;        // months since January (0-11)
+  gps_epoch.tm_mday = 6;           // 6th day
+  time_t gps_epoch_tm = mktime(&gps_epoch);
+  auto gps_epoch_tp = std::chrono::system_clock::from_time_t(gps_epoch_tm);
+
+  const auto leap_seconds = std::chrono::seconds{utc_offset}; // GPS-UTC offset
+  const auto week_duration = std::chrono::hours{gps_time.week * 7 * 24};
+  const auto gps_time_duration = std::chrono::milliseconds{gps_time.time_msec};
+
+  const auto gps_total_time = gps_epoch_tp + week_duration + gps_time_duration - leap_seconds;
+
+  return rclcpp::Time(std::chrono::duration_cast<std::chrono::nanoseconds>(
+                        gps_total_time.time_since_epoch()).count(), RCL_SYSTEM_TIME);
 }
 
 nav_msgs::msg::Odometry toOdometry(const trmb::gsof::NavigationSolution &ins_solution,

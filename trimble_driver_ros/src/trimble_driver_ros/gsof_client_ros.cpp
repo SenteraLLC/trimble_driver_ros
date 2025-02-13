@@ -89,6 +89,7 @@ void GsofClientRos::setupRosPublishersAndCallbacks() {
   registerCallback(trmb::gsof::GSOF_ID_1_POS_TIME, &GsofClientRos::saveGsof1Callback);
   registerCallback(trmb::gsof::GSOF_ID_2_LLH, &GsofClientRos::saveGsof2Callback);
   registerCallback(trmb::gsof::GSOF_ID_12_POS_SIGMA, &GsofClientRos::saveGsof12Callback);
+  registerCallback(trmb::gsof::GSOF_ID_16_CURR_TIME, &GsofClientRos::saveGsof16Callback);
   registerCallback(trmb::gsof::GSOF_ID_49_INS_FULL_NAV, &GsofClientRos::saveGsof49Callback);
   registerCallback(trmb::gsof::GSOF_ID_50_INS_RMS, &GsofClientRos::saveGsof50Callback);
 
@@ -226,6 +227,10 @@ void GsofClientRos::saveGsof12Callback(const trmb::gsof::Message &message) {
   position_sigma_info_.emplace(message.as<trmb::gsof::PositionSigmaInfo>());
 }
 
+void GsofClientRos::saveGsof16Callback(const trmb::gsof::Message &message) {
+  current_time_.emplace(message.as<trmb::gsof::CurrentTime>());
+}
+
 void GsofClientRos::saveGsof49Callback(const trmb::gsof::Message &message) {
   const auto &ins_solution = message.as<trmb::gsof::NavigationSolution>();
   ins_solution_.emplace(ins_solution);
@@ -303,6 +308,13 @@ rclcpp::Time GsofClientRos::getRosTimestamp(const trmb::gsof::GpsTime &gps_time)
       return toRosTimeOfTheWeek(gps_time);
     case util::RosTimeSource::GPS:
       return toRosTimeGpsEpoch(gps_time);
+    case util::RosTimeSource::GPS_UTC:
+      if (!current_time_) {
+        RCLCPP_WARN_SKIPFIRST_THROTTLE(this->get_logger(), *this->get_clock(), 5000, 
+            "UTC offset has not been received. Ensure #16 Current Time UTC is enabled.");
+        return rclcpp::Time(0, 0, RCL_STEADY_TIME);
+      }
+      return toRosTimeGpsUTC(gps_time, current_time_->utc_offset);
     default:
       // Should never happen because we are protected by -Wswitch-enum
       throw std::logic_error("Unhandled RosTimeSource.");

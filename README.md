@@ -46,6 +46,8 @@ Other Trimble products supporting GSOF output may also be compatible.
       - #1  Position Time Info
       - #2  Lat Long Height
       - #12 Position Sigma Info
+    - To use `gps_utc` we need the leap seconds, so enable
+      - #16 Current Time UTC
 6. Click `ok` to save your settings
 
 Back at the `IO Configuration > Port Summary` page, you should see your port with the word "GSOF" in the output column. Once you start the node, you should see the port's row turn green to indicate a connection is active.
@@ -112,7 +114,7 @@ Data Collector" (DCOL) protocol.
 | `publish_gsof_msgs`                     | `bool`         | Enable publishing of the ROS version of GSOF messages. These messages have almost exactly the same format as those defined in the GSOF protocol.                                                                                                                                                                                                                                                                              |
 | `estimate_gsof_time`                    | `bool`         | This will use the nearest PositionTime (#1) or INSSolution (#49) message as the ROS `std_msgs::msg::Header` timestamp for messages that do not have GPS time in the GSOF protocol.  To get the most accurate time stamp, one of these two messages should be broadcast at equal or greater than the highest GSOF update rate. If this is disabled, some GSOF translated messages will have their `std_msgs::msg::Header` timestamps at 0 sec, 0 ns.                     | 
 | `publish_ros_msgs`                      | `bool`         | Enable publishing of "standard" ROS messages such as `nav_msgs::msg::Odometry` and `sensor_msgs::msg::NavSatFix`.                                                                                                                                                                                                                                                                                                             |
-| `time_source`                           | `string`       | Valid values are `gps_time_of_week`, `now`, `gps`. When publishing a ROS message, the time stamp in `std_msgs::msg::Header` will be set according to this parameter. Valid values are &nbsp;<ul><li>`gps_time_of_week` : Time of the week according to the GPS clock.</li><li>`now` : System time sampled as the message was published.</li><li>`gps` : GPS clock time since the GPS epoch January 5th to 6th 1980.</li></ul> |
+| `time_source`                           | `string`       | Valid values are `gps_time_of_week`, `now`, `gps`. When publishing a ROS message, the time stamp in `std_msgs::msg::Header` will be set according to this parameter. Valid values are &nbsp;<ul><li>`gps_time_of_week` : Time of the week according to the GPS clock.</li><li>`now` : System time sampled as the message was published.</li><li>`gps` : GPS clock time since the GPS epoch January 5th to 6th 1980.</li><li>`gps_utc` : GPS clock converted to unix time since epoch w/ leap seconds. </li></ul> |
 
 ### Topics
 

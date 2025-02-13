@@ -81,6 +81,7 @@ class GsofClientRos : public rclcpp::Node {
   std::optional<trmb::gsof::PositionSigmaInfo> position_sigma_info_;
   std::optional<trmb::gsof::NavigationSolution> ins_solution_;
   std::optional<trmb::gsof::NavigationPerformance> ins_solution_rms_;
+  std::optional<trmb::gsof::CurrentTime> current_time_;
 
   void setupRosParameters();
 
@@ -103,6 +104,7 @@ class GsofClientRos : public rclcpp::Node {
   void saveGsof1Callback(const trmb::gsof::Message &message);
   void saveGsof2Callback(const trmb::gsof::Message &message);
   void saveGsof12Callback(const trmb::gsof::Message &message);
+  void saveGsof16Callback(const trmb::gsof::Message &message);
   void saveGsof49Callback(const trmb::gsof::Message &message);
   void saveGsof50Callback(const trmb::gsof::Message &message);
 

@@ -198,6 +198,7 @@ gsof_msgs::msg::LatLongHeight toRosLlh(const trmb::Llad &lla);
 
 rclcpp::Time toRosTimeOfTheWeek(const trmb::gsof::GpsTime &gps_time);
 rclcpp::Time toRosTimeGpsEpoch(const trmb::gsof::GpsTime &gps_time);
+rclcpp::Time toRosTimeGpsUTC(const trmb::gsof::GpsTime &gps_time, uint16_t utc_offset = 0);
 
 gsof_msgs::msg::GpsTime toRosMessage(const trmb::gsof::GpsTime &gps_time);
 gsof_msgs::msg::Status toRosMessage(const trmb::gsof::Status &status);
